@@ -1,31 +1,101 @@
 ﻿import React, { Component } from 'react';
 
-export class UserView extends Component {
 
+export class UserView extends Component {   
     constructor(props) {
         super(props);
         this.AddCoin = this.AddCoin.bind(this);
-        this.state = { count:0 };
+        this.RemoveDrink = this.RemoveDrink.bind(this);
+        this.AddDrink = this.AddDrink.bind(this);
+        this.state = { count:0, drinks:null, sum:0};
     }
+    async componentDidMount() {
+        await fetch('https://localhost:44347/api/drinks')
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                let drinks = data.map((d) => {
+                    return {
+                        ...d,
+                        selected: 0
+                    }
+                });
+                this.setState({ drinks: drinks });
+            })
+    }
+
     AddCoin = coin => e => {
         this.setState({ count: this.state.count + coin })
     };
+
+
+    RemoveDrink = id => e => {
+        this.setState(prevState => {
+            const drinks = [...prevState.drinks];
+            drinks[id].selected = drinks[id].selected - 1;
+            const sum = prevState.sum - drinks[id].price;
+            return { drinks: drinks, sum: sum };
+        })
+    };
+
+    AddDrink = id => e => {
+        this.setState(prevState => {
+            const drinks = [...prevState.drinks];
+            drinks[id].selected = drinks[id].selected + 1;
+            const sum = prevState.sum + drinks[id].price;
+            return { drinks: drinks,sum:sum };
+        })
+    };
     render() {
-        return (            
-            <div>
-                {this.state.count}
-                <button onClick={this.AddCoin(1)}>
-                    1
-        </button>
-                <button onClick={this.AddCoin(2)}>
-                    2
-        </button>
-                <button onClick={this.AddCoin(5)}>
-                    5
-        </button>
-                <button onClick={this.AddCoin(10)}>
-                    10
-        </button>
+        if (!this.state.drinks) {
+            return null;
+        }
+        return (
+            <div className="container">
+                <div class="row">
+                <div class="col">
+            <div className="container">
+                <div class="row justify-content-md-center">
+                    Money: {this.state.count}
+                    </div>
+                <div class="row">
+                    <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(1)}>
+                        1
+        </button></div>
+                    <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(2)}>
+                        2
+        </button></div>
+                </div>
+                    <div class="row">
+                    <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(5)}>
+                        5
+        </button></div>
+                    <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(10)}>
+                        10
+        </button></div>
+                            </div>
+                            <div class="row justify-content-md-center">
+                               Sum: {this.state.sum}
+                            </div>
+                    </div>
+                </div>
+                    <div class="col">
+                        {this.state.drinks.map((drink) => (                            
+                            <div key={drink.id}>                                
+                                <div>{drink.name}</div>
+                                <div>{drink.price}</div>
+                                <button type="button" className="btn btn-dark" onClick={this.RemoveDrink(this.state.drinks.indexOf(drink))}>-</button><div>{drink.selected}<button type="button" className="btn btn-dark" onClick={this.AddDrink(this.state.drinks.indexOf(drink))}>+</button></div>
+                                
+                                
+                            </div>                            
+                            
+                        ))}
+                    </div>
+                </div>               
+                
+                
+                
             </div>
         );
     }

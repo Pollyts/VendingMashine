@@ -1,22 +1,23 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router';
-import { Layout } from './components/Layout';
-import { Home } from './components/Home';
-import { FetchData } from './components/FetchData';
-import { Counter } from './components/Counter';
+import { BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
+import { UserView } from './components/UserView';
+import { AdminView } from './components/AdminView';
+//import { Home } from './components/Home';
+//import { FetchData } from './components/FetchData';
+//import { Counter } from './components/Counter';
 
 import './custom.css'
 
 export default class App extends Component {
-  static displayName = App.name;
 
   render () {
-    return (
-      <Layout>
-        <Route exact path='/' component={Home} />
-        <Route path='/counter' component={Counter} />
-        <Route path='/fetch-data' component={FetchData} />
-      </Layout>
+      return (
+          <Router>
+              <Switch>
+        <Route exact path='/' component={UserView} />
+                  <Route exact path='/:key' component={AdminView} />
+              </Switch>
+          </Router>
     );
   }
 }

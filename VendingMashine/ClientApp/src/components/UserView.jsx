@@ -26,12 +26,18 @@ export class UserView extends Component {
             })
     }
 
-    AddCoin = coin => e => {
-        this.setState({ money: this.state.money + coin })
+    AddCoin = coin => async e => {
+        await this.AddCoinToMashine(coin)
+        this.setState({ money: this.state.money + coin })        
     };
 
+    async AddCoinToMashine(name) {
+        await fetch('https://localhost:44347/api/coins/' + name
+        );
+    }
+
     async ReduceCountDrink(drink) {
-        let drink = {
+        let newdrink = {
             Id: drink.id,
             Name: drink.name,
             Price: drink.price,
@@ -39,7 +45,7 @@ export class UserView extends Component {
         }
         await fetch('https://localhost:44347/api/drinks', {
             method: "PUT",
-            body: JSON.stringify(drink),
+            body: JSON.stringify(newdrink),
             headers: {
                 Accept: "application/json",
                 "Content-Type": "application/json",
@@ -51,7 +57,7 @@ export class UserView extends Component {
         e.preventDefault();
         this.state.drinks.forEach((drink) => {
             if (drink.selected > 0) {
-                await this.ReduceCountDrink(drink);
+                this.ReduceCountDrink(drink);
             }
         });
     };
@@ -112,7 +118,14 @@ export class UserView extends Component {
                                 <div>{drink.name}</div>
                                     <div>{drink.price}</div>
                                     <div className="row">
-                                <button type="button" className="btn btn-dark" onClick={this.RemoveDrink(this.state.drinks.indexOf(drink))}>-</button><div>{drink.selected}<button type="button" className="btn btn-dark" onClick={this.AddDrink(this.state.drinks.indexOf(drink))}>+</button></div>
+                                        {drink.selected ===0 ?
+                                            <button type="button" className="btn btn-dark disabled">-</button>
+                                            : <button type="button" className="btn btn-dark" onClick={this.RemoveDrink(this.state.drinks.indexOf(drink))}>-</button>}
+                                        <div>{drink.selected}</div>
+
+                                            {drink.selected === drink.count ?
+                                                <button type="button" className="btn btn-dark disabled">+</button>
+                                                : <button type="button" className="btn btn-dark" onClick={this.AddDrink(this.state.drinks.indexOf(drink))}>+</button>}
                                 </div>
                                 
                             </div>                            

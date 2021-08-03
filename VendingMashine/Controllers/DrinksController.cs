@@ -44,19 +44,7 @@ namespace VendingMashine.Controllers
             olddrink.Count = newdrink.Count;
             db.Entry(olddrink).State = EntityState.Modified;
             await db.SaveChangesAsync();
-        }
-
-
-        [HttpPut]
-        public async Task ChangeDrink(Drink newdrink)
-        {
-            Drink olddrink = await db.Drinks.Where(x => x.Id == newdrink.Id).FirstAsync();
-            olddrink.Name = newdrink.Name;
-            olddrink.Price = newdrink.Price;
-            olddrink.Count = newdrink.Count;
-            db.Entry(olddrink).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
+        }        
 
         [HttpDelete("{id}")]
         public async Task DeleteDrink(int id)

@@ -8,27 +8,44 @@ export class AdminView extends Component {
         this.AddCoin = this.AddCoin.bind(this);
         this.RemoveDrink = this.RemoveDrink.bind(this);
         this.AddDrink = this.AddDrink.bind(this);
-        this.state = { count: 0, drinks: null, sum: 0 };
+        this.state = { coins:null, drinks: null };
     }
     async componentDidMount() {
         if (this.props.match.params.key !== key) {
             alert("Неверный код");
             this.props.history.push("/");
         }
+
+        let db_coins;
+        let db_drinks;
         
         await fetch('https://localhost:44347/api/drinks')
             .then((response) => {
                 return response.json();
             })
             .then((data) => {
-                let drinks = data.map((d) => {
+                db_drinks = data.map((d) => {
                     return {
                         ...d,
                         selected: 0
                     }
                 });
-                this.setState({ drinks: drinks });
+                
             })
+        await fetch('https://localhost:44347/api/coins')
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                let db_drinks = data.map((d) => {
+                    return {
+                        ...d,
+                        selected: 0
+                    }
+                });
+
+            })
+        this.setState({ drinks: drinks });
     }
 
     AddCoin = coin => e => {
@@ -62,28 +79,26 @@ export class AdminView extends Component {
                 <div class="row">
                     <div class="col">
                         <div className="container">
-                            <div class="row justify-content-md-center">
-                                Money: {this.state.count}
-                            </div>
-                            <div class="row">
-                                <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(1)}>
-                                    1
-        </button></div>
-                                <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(2)}>
-                                    2
-        </button></div>
-                            </div>
-                            <div class="row">
-                                <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(5)}>
-                                    5
-        </button></div>
-                                <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(10)}>
-                                    10
-        </button></div>
-                            </div>
-                            <div class="row justify-content-md-center">
-                                Sum: {this.state.sum}
-                            </div>
+                            {this.state.coins.map((coin) => (                                
+                                <div key={coin.id} className="col">
+                                    <div className="row">
+                                        {coin.name}
+                                        </div>
+                                    <div className="row">
+                                        <div class="col">
+                                            <div className="row">Количество</div>
+                                            <div className="row">{coin.count}</div>
+
+                                        </div>
+                                        <div class="col">
+                                            <button type="button" className="btn btn-dark" onClick={this.AddCoin(2)}>
+                                                Блокировать</button>
+
+                                        </div>
+                                    </div>
+                                    </div>
+
+                            ))}
                         </div>
                     </div>
                     <div className="col">

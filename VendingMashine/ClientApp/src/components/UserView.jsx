@@ -51,7 +51,19 @@ export class UserView extends Component {
                 "Content-Type": "application/json",
             },
         });
-}
+    }
+    async GetOddMoney() {
+        let change = this.state.money - this.state.sum;
+        let oddmoney=0;
+        if (change > 0) {
+            await fetch('https://localhost:44347/api/coins/oddmoney/' + change).then(response => { return response.json() })
+                .then(data => {
+                    oddmoney = data
+                });       
+        }
+        alert("Сдача " + oddmoney);
+        window.location.reload();
+    }
 
     async Buy(e) {
         e.preventDefault();
@@ -60,6 +72,7 @@ export class UserView extends Component {
                 this.ReduceCountDrink(drink);
             }
         });
+        this.GetOddMoney();
     };
 
 

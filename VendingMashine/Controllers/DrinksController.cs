@@ -28,5 +28,42 @@ namespace VendingMashine.Controllers
                 return NotFound();
             return drinks;
         }
+
+        [HttpPost]
+        public async Task<ActionResult> PostDrink(Drink drink)
+        {            
+            db.Drinks.Add(drink);
+            await db.SaveChangesAsync();            
+            return Ok();
+        }
+        public async Task ChangeDrink(Drink newdrink)
+        {
+            Drink olddrink = await db.Drinks.Where(x => x.Id == newdrink.Id).FirstAsync();
+            olddrink.Name = newdrink.Name;
+            olddrink.Price = newdrink.Price;
+            olddrink.Count = newdrink.Count;
+            db.Entry(olddrink).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
+
+        [HttpPut]
+        public async Task ChangeDrink(Drink newdrink)
+        {
+            Drink olddrink = await db.Drinks.Where(x => x.Id == newdrink.Id).FirstAsync();
+            olddrink.Name = newdrink.Name;
+            olddrink.Price = newdrink.Price;
+            olddrink.Count = newdrink.Count;
+            db.Entry(olddrink).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task DeleteDrink(int id)
+        {
+            Drink drink = await db.Drinks.Where(x => x.Id == id).FirstAsync();
+            db.Drinks.Remove(drink);
+            await db.SaveChangesAsync();
+        }
     }
 }

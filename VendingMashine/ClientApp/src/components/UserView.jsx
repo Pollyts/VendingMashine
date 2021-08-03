@@ -7,7 +7,8 @@ export class UserView extends Component {
         this.AddCoin = this.AddCoin.bind(this);
         this.RemoveDrink = this.RemoveDrink.bind(this);
         this.AddDrink = this.AddDrink.bind(this);
-        this.state = { count:0, drinks:null, sum:0};
+        this.Buy = this.Buy.bind(this);
+        this.state = { money:0, drinks:null, sum:0};
     }
     async componentDidMount() {
         await fetch('https://localhost:44347/api/drinks')
@@ -26,7 +27,33 @@ export class UserView extends Component {
     }
 
     AddCoin = coin => e => {
-        this.setState({ count: this.state.count + coin })
+        this.setState({ money: this.state.money + coin })
+    };
+
+    async ReduceCountDrink(drink) {
+        let drink = {
+            Id: drink.id,
+            Name: drink.name,
+            Price: drink.price,
+            Count: drink.count - drink.selected
+        }
+        await fetch('https://localhost:44347/api/drinks', {
+            method: "PUT",
+            body: JSON.stringify(drink),
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+}
+
+    async Buy(e) {
+        e.preventDefault();
+        this.state.drinks.forEach((drink) => {
+            if (drink.selected > 0) {
+                await this.ReduceCountDrink(drink);
+            }
+        });
     };
 
 
@@ -57,7 +84,7 @@ export class UserView extends Component {
                 <div class="col">
             <div className="container">
                 <div class="row justify-content-md-center">
-                    Money: {this.state.count}
+                    Money: {this.state.money}
                     </div>
                 <div class="row">
                     <div class="col"><button type="button" className="btn btn-dark" onClick={this.AddCoin(1)}>
@@ -75,25 +102,33 @@ export class UserView extends Component {
                         10
         </button></div>
                             </div>
-                            <div class="row justify-content-md-center">
-                               Sum: {this.state.sum}
-                            </div>
+                            
                     </div>
                 </div>
-                    <div class="col">
-                        {this.state.drinks.map((drink) => (                            
-                            <div key={drink.id}>                                
+                    <div className="col">
+                        <div className="row">
+                            {this.state.drinks.map((drink) => (
+                                <div key={drink.id} className="col">
                                 <div>{drink.name}</div>
-                                <div>{drink.price}</div>
+                                    <div>{drink.price}</div>
+                                    <div className="row">
                                 <button type="button" className="btn btn-dark" onClick={this.RemoveDrink(this.state.drinks.indexOf(drink))}>-</button><div>{drink.selected}<button type="button" className="btn btn-dark" onClick={this.AddDrink(this.state.drinks.indexOf(drink))}>+</button></div>
-                                
+                                </div>
                                 
                             </div>                            
                             
                         ))}
+                            </div>
                     </div>
-                </div>               
-                
+                </div>
+                <div className="row justify-content-md-center">
+                    Sum: {this.state.sum}
+                </div>
+                <div className="row justify-content-md-center">
+                    {(this.state.sum > this.state.money || this.state.sum===0) ?
+                        <button type="button" className="btn btn-dark disabled">Buy</button>
+                        : <button type="button" className="btn btn-dark" onClick={this.Buy}>Buy</button>}
+                </div>
                 
                 
             </div>

@@ -1,14 +1,40 @@
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+.active{
+    background-color:lightgoldenrodyellow;
 }
 
 code {
   color: #E01A76;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+.drinkimage {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
 }
+
+.drinkcursor {
+   cursor:pointer;
+}
+
+
+.downloadimage {
+    margin: 20px;
+    height: 100px;
+    width: auto;
+}
+
+.instruments {
+    width: 170px !important;
+    height: 40px !important;
+}
+.x-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+}
+
+.no-overfolw {
+    overflow: hidden;
+    white-space: nowrap
+}
+

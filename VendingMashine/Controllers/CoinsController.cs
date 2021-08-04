@@ -27,6 +27,15 @@ namespace VendingMashine.Controllers
             await db.SaveChangesAsync();
         }
 
+        [HttpPut]
+        public async Task ChangeCoinCount(Coin newcoin)
+        {
+            Coin oldcoin = await db.Coins.Where(x => x.Id == newcoin.Id).FirstAsync();
+            oldcoin.Count = newcoin.Count;
+            db.Entry(oldcoin).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
+
         [HttpGet]
         public async Task<ActionResult<Coin[]>> GetCoins()
         {
@@ -35,6 +44,16 @@ namespace VendingMashine.Controllers
             if (coins == null)
                 return NotFound();
             return coins;
+        }
+
+        [Route("/api/coins/block/{name}")]
+        [HttpGet]
+        public async Task BlockCoin(string name)
+        {
+            Coin coin = await db.Coins.Where(x => x.Name == name).FirstAsync();
+            coin.IsBlocked=!coin.IsBlocked;
+            db.Entry(coin).State = EntityState.Modified;
+            await db.SaveChangesAsync();
         }
 
         public static int OddMoney;

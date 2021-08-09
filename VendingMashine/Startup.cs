@@ -7,26 +7,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VendingMashine.Models;
 using Microsoft.EntityFrameworkCore;
+using VendingMashine._Database.Interfaces;
+using VendingMashine._Database.Repositories;
 
 namespace VendingMashine
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+        }        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.AddControllersWithViews();
-
-            string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<VMContext>(options => options.UseSqlServer(connection));
+            services.AddScoped<IRepositoryVMContext, RepositoryVMContext>(); // 1
+            services.AddScoped<ICoinRepository>(provider => new CoinRepository(Configuration.GetConnectionString("DefaultConnection"), provider.GetService<IRepositoryVMContext>()));
+            //string connection = Configuration.GetConnectionString("DefaultConnection");
+            //services.AddDbContext<VMContext>(options => options.UseSqlServer(connection));
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

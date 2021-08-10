@@ -15,7 +15,6 @@ namespace VendingMashine.Controllers
     public class CoinsController : ControllerBase
     {
         ICoinService _coinService;
-        VMContext db;
         public CoinsController(ICoinService coinService)
         {
             _coinService = coinService;

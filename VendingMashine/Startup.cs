@@ -28,9 +28,14 @@ namespace VendingMashine
             services.AddControllersWithViews();
             services.AddScoped<IRepositoryVMContext, RepositoryVMContext>();
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddScoped<ICoinRepository>(provider => new CoinRepository(connection, provider.GetService<IRepositoryVMContext>()));            
+            services.AddScoped<ICoinRepository>(provider => new CoinRepository(connection, provider.GetService<IRepositoryVMContext>()));
+            services.AddScoped<ICoinService, CoinService>();
+            services.AddScoped<IDrinkRepository>(provider => new DrinkRepository(connection, provider.GetService<IRepositoryVMContext>()));
+            services.AddScoped<IDrinkService, DrinkService>();
+
+
             services.AddDbContext<VMContext>(options => options.UseSqlServer(connection));
-            services.AddScoped<ICoinService,CoinService>();
+            
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {

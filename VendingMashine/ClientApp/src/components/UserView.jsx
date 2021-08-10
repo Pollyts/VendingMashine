@@ -38,6 +38,7 @@ export class UserView extends Component {
         return db_coins;
     }
 
+
     async componentDidMount() {
         let db_coins = await this.GetCoins();
         let db_drinks = await this.GetDrinks();
@@ -155,8 +156,8 @@ export class UserView extends Component {
                                     <div className="row no-overfolw justify-content-center">{drink.name}</div>
                                     <div className="row no-overfolw justify-content-center">
                                     <img
-                                        className="drinkimage d-flex justify-content-center"
-                                        src={`data:image/jpeg;base64,${drink.image}`}
+                                            className="drinkimage d-flex justify-content-center"                                            
+                                            src={`https://localhost:44347/api/drinks/images/${drink.id}`}
                                         alt="No Image"
                                         />
                                     </div>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using VendingMashine.Models;
 using VendingMashine.Services;
 using VendingMashine._Database.Interfaces;
+using System.IO;
 
 namespace VendingMashine.Services
 {
@@ -38,6 +39,19 @@ namespace VendingMashine.Services
         public async Task PostDrinksWithImage(int id, [FromForm] DrinkWithImage el)
         {
             await _repository.PostDrinksWithImage(id, el);
+        }
+        public async Task<byte[]> GetImageForDrink(int id)
+        {
+            var b_image = await _repository.GetImage(id);
+            if (b_image != null)
+            {
+    //            string imageBase64Data =
+    //Convert.ToBase64String(b_image);
+    //            string imageDataURL = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+    //            return imageDataURL;
+                return b_image;
+            }
+            else return null;
         }
     }
 }

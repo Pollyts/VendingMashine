@@ -48,6 +48,18 @@ namespace VendingMashine._Database.Repositories
                 return drinks;
             }
         }
+        public async Task<byte[]> GetImage(int id)
+        {
+            using (var db = ContextFactory.CreateDbContext(ConnectionString))
+            {
+                var b_image = await db.DrinkImages.Where(x => x.DrinkId == id).FirstOrDefaultAsync();
+                if (b_image != null)
+                    return b_image.Image;
+                else return null;
+            }
+        }
+
+
 
         public async Task<int> PostDrink(Drink drink)
         {
@@ -62,15 +74,14 @@ namespace VendingMashine._Database.Repositories
         public async Task PostDrinksWithImage(int id, [FromForm] DrinkWithImage el)
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
-            {
-                Drink drink = await db.Drinks.Where(x => x.Id == id).FirstOrDefaultAsync();
+            {                
                 byte[] imageData = null;
                 using (var binaryReader = new BinaryReader(el.Image.OpenReadStream()))
                 {
                     imageData = binaryReader.ReadBytes((int)el.Image.Length);
                 }
-                drink.Image = imageData;
-                db.Entry(drink).State = EntityState.Modified;
+                DrinkImage image = new DrinkImage() { DrinkId = id, Image=imageData };
+                db.DrinkImages.Add(image);
                 await db.SaveChangesAsync();
             }
         }

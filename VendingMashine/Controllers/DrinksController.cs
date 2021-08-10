@@ -26,6 +26,15 @@ namespace VendingMashine.Controllers
         {
             return await _drinkService.GetDrinks();
         }
+        [HttpGet]
+        [Route("/api/drinks/images/{id}")]
+        public async Task<IActionResult> GetImagesForDrinks(int id)
+        {
+            var image = await _drinkService.GetImageForDrink(id);
+            return File(image, "image/jpeg");
+            //return await _drinkService.GetImageForDrink(id);
+            //return File(image, "image/jpeg");
+        }
 
         [HttpPost]
         public async Task<int> PostDrink(Drink drink)

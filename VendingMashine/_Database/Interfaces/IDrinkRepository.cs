@@ -16,6 +16,7 @@ namespace VendingMashine._Database.Interfaces
         Task PostDrinksWithImage(int id, [FromForm] DrinkWithImage el);
         Task ChangeDrink(Drink newdrink);
         Task DeleteDrink(int id);
+        Task<byte[]> GetImage(int id);
 
     }
 }

@@ -14,5 +14,6 @@ namespace VendingMashine.Services
         Task PostDrinksWithImage(int id, [FromForm] DrinkWithImage el);
         Task ChangeDrink(Drink newdrink);
         Task DeleteDrink(int id);
+        Task<byte[]> GetImageForDrink(int id);
     }
 }

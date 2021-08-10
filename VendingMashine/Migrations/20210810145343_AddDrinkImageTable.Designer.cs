@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VendingMashine.Models;
 
 namespace VendingMashine.Migrations
 {
     [DbContext(typeof(VMContext))]
-    partial class VMContextModelSnapshot : ModelSnapshot
+    [Migration("20210810145343_AddDrinkImageTable")]
+    partial class AddDrinkImageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,7 +81,7 @@ namespace VendingMashine.Migrations
                     b.HasIndex("DrinkId")
                         .IsUnique();
 
-                    b.ToTable("DrinkImages");
+                    b.ToTable("DrinkImage");
                 });
 
             modelBuilder.Entity("VendingMashine.Models.DrinkImage", b =>

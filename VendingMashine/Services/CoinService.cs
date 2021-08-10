@@ -3,43 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VendingMashine.Models;
+using VendingMashine._Database.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace VendingMashine.Services
 {
     public class CoinService : ICoinService
     {
-        public CoinService()
+        ICoinRepository _repository;
+        public CoinService(ICoinRepository repository)
         {
+            _repository = repository;
         }
 
-        public Task AddCoin(string name)
+        public async Task AddCoin(string name)
         {
-            throw new NotImplementedException();
+            await _repository.AddCoin(name);
         }
 
-        public Task BlockCoin(string name)
+        public async Task BlockCoin(string name)
         {
-            throw new NotImplementedException();
+            await _repository.BlockCoin(name);
         }
 
-        public Task ChangeCoinCount(Coin newcoin)
+        public async Task ChangeCoinCount(Coin newcoin)
         {
-            throw new NotImplementedException();
+            await _repository.ChangeCoinCount(newcoin);
         }
 
-        public Task GetCoinChange(string coin, int change)
+        public async Task GetCoinChange(string coin, int change)
         {
-            throw new NotImplementedException();
+            await _repository.GetCoinChange(coin,change);
         }
 
-        public Task<Coin[]> GetCoins()
+        public async Task<Coin[]> GetCoins()
         {
-            throw new NotImplementedException();
+            return await _repository.GetCoins();
         }
 
-        public Task GetOddMoney(int change)
+        public async Task<int> GetOddMoney(int change)
         {
-            throw new NotImplementedException();
+            return await _repository.GetOddMoney(change);
         }
     }
 }

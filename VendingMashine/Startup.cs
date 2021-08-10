@@ -9,6 +9,7 @@ using VendingMashine.Models;
 using Microsoft.EntityFrameworkCore;
 using VendingMashine._Database.Interfaces;
 using VendingMashine._Database.Repositories;
+using VendingMashine.Services;
 
 namespace VendingMashine
 {
@@ -25,11 +26,11 @@ namespace VendingMashine
         {
 
             services.AddControllersWithViews();
-            services.AddScoped<IRepositoryVMContext, RepositoryVMContext>(); // 1
-            services.AddScoped<ICoinRepository>(provider => new CoinRepository(Configuration.GetConnectionString("DefaultConnection"), provider.GetService<IRepositoryVMContext>()));
-            //string connection = Configuration.GetConnectionString("DefaultConnection");
-            //services.AddDbContext<VMContext>(options => options.UseSqlServer(connection));
-
+            services.AddScoped<IRepositoryVMContext, RepositoryVMContext>();
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddScoped<ICoinRepository>(provider => new CoinRepository(connection, provider.GetService<IRepositoryVMContext>()));            
+            services.AddDbContext<VMContext>(options => options.UseSqlServer(connection));
+            services.AddScoped<ICoinService,CoinService>();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {

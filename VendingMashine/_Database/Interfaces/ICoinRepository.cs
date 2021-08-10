@@ -6,13 +6,13 @@ using VendingMashine.Models;
 
 namespace VendingMashine._Database.Interfaces
 {
-    interface ICoinRepository
+    public interface ICoinRepository
     {
 		Task AddCoin(string name);
 		Task ChangeCoinCount(Coin newcoin);
 		Task<Coin[]> GetCoins();
 		Task BlockCoin(string name);
-		Task GetOddMoney(int change);
+		Task<int> GetOddMoney(int change);
 		Task GetCoinChange(string coin, int change);
 	}
 }

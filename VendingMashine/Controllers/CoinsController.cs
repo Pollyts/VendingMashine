@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VendingMashine.Models;
 using Microsoft.EntityFrameworkCore;
+using VendingMashine.Services;
 
 namespace VendingMashine.Controllers
 {
@@ -13,82 +14,44 @@ namespace VendingMashine.Controllers
     [ApiController]
     public class CoinsController : ControllerBase
     {
+        ICoinService _coinService;
         VMContext db;
-        public CoinsController(VMContext context)
+        public CoinsController(ICoinService coinService)
         {
-            db = context;
+            _coinService = coinService;
         }
         [HttpGet("{name}")]
         public async Task AddCoin(string name)
         {
-            Coin coin = await db.Coins.Where(x => x.Name == name).FirstAsync();
-            coin.Count ++;            
-            db.Entry(coin).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            await _coinService.AddCoin(name);
         }
 
         [HttpPut]
         public async Task ChangeCoinCount(Coin newcoin)
         {
-            Coin oldcoin = await db.Coins.Where(x => x.Id == newcoin.Id).FirstAsync();
-            oldcoin.Count = newcoin.Count;
-            db.Entry(oldcoin).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            await _coinService.ChangeCoinCount(newcoin);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Coin[]>> GetCoins()
+        public async Task<Coin[]> GetCoins()
         {
-            Coin[] coins;
-            coins = await db.Coins.ToArrayAsync();
-            if (coins == null)
-                return NotFound();
-            return coins;
+            return await _coinService.GetCoins();
         }
 
         [Route("/api/coins/block/{name}")]
         [HttpGet]
         public async Task BlockCoin(string name)
         {
-            Coin coin = await db.Coins.Where(x => x.Name == name).FirstAsync();
-            coin.IsBlocked=!coin.IsBlocked;
-            db.Entry(coin).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            await _coinService.BlockCoin(name);
         }
 
-        public static int OddMoney;
+        
 
         [Route("/api/coins/oddmoney/{change}")]
         [HttpGet]
-        public async Task<ActionResult<int>> GetOddMoney(int change)
+        public async Task<int> GetOddMoney(int change)
         {
-            OddMoney = 0;
-            await GetCoinChange("10", change);
-            return Ok(OddMoney);
-        }        
-
-        public async Task GetCoinChange(string coin, int change)
-        {
-            int coinvalue_int = Convert.ToInt32(coin);            
-            Coin currentcoin = await db.Coins.Where(x => x.Name == coin).FirstOrDefaultAsync();
-            if(change/ coinvalue_int <= currentcoin.Count)
-            {
-                OddMoney += change - change%coinvalue_int;
-                currentcoin.Count = currentcoin.Count - Convert.ToInt32(change / coinvalue_int);
-                change = change % coinvalue_int;                
-            }
-            else
-            {
-                OddMoney += currentcoin.Count * coinvalue_int;
-                change = change - currentcoin.Count * coinvalue_int;
-                currentcoin.Count = 0;
-            }
-            db.Entry(currentcoin).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-            if ((change>0)&&(coinvalue_int != 1))
-            {
-                await GetCoinChange(Convert.ToString(Convert.ToInt32(coinvalue_int / 2)), change);
-            }
-        }
+            return await _coinService.GetOddMoney(change);
+        } 
     }
 }

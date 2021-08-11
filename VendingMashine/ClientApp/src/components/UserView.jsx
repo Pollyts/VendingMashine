@@ -114,7 +114,10 @@ export class UserView extends Component {
                         <div className="row justify-content-md-left ml-2 mb-2">
                             Выбрано напитков на сумму: {this.state.sum}
                         </div>
-                        <div className="row justify-content-md-center mt-5">
+                        <div className="row justify-content-md-center mt-3">
+                            {(this.state.sum > this.state.money) ? <div className="text-danger">Нехватает монет для покупки</div>:null}
+                                </div>
+                        <div className="row justify-content-md-center mt-1">
                             {(this.state.sum > this.state.money || this.state.sum === 0) ?
                                 <button type="button" className="btn btn-success disabled btn-lg">Купить</button>
                                 : <button type="button" className="btn btn-success btn-lg" onClick={this.Buy}>Купить</button>}

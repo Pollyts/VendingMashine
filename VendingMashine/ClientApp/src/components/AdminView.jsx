@@ -1,5 +1,6 @@
 ﻿import React, { Component } from 'react';
 import { DeleteButton } from './/ModalWindows/DeleteDrink';
+import { Message } from './/ModalWindows/Message';
 import { SaveCoinsCount, GetCoins, BlockToMashine } from './/Functions/FetchCoin';
 import { GetDrinks, SendDrink, SaveImage, PutImage, PutDrink } from './/Functions/FetchDrinks';
 
@@ -17,10 +18,11 @@ export class AdminView extends Component {
         this.ChangeCount = this.ChangeCount.bind(this);
         this.SaveCoinsCount = this.SaveCoinsCount.bind(this);
         this.handleImageChange = this.handleImageChange.bind(this);
-        this.handleToUpdate = this.handleToUpdate.bind(this)
+        this.handleToUpdate = this.handleToUpdate.bind(this);
+        this.HideMessage = this.HideMessage.bind(this)
         this.Ok = this.Ok.bind(this);
         this.state = {
-            coins: null, drinks: null, file: null, filepath: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false
+            coins: null, drinks: null, file: null, message: {header:null, body:null, show:false}, filepath: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false
         };
     }
     async componentDidMount() {
@@ -36,6 +38,9 @@ export class AdminView extends Component {
     async handleToUpdate() {
         let db_drinks = await this.GetDrinks();
         this.setState({ drinks: db_drinks});
+    }
+    async HideMessage() {        
+        this.setState({ message: { header: null, body: null, show: false }});
     }
 
     handleImageChange(e) {
@@ -80,9 +85,7 @@ export class AdminView extends Component {
         let db_coins = await GetCoins();
         return db_coins;
     }
-
-    
-
+       
     BlockCoin = id => async e => {
         let coins;
         this.setState(prevState => {
@@ -103,16 +106,7 @@ export class AdminView extends Component {
             this.setState({ type: false, selecteddrink: { id: null, name: "", price: "", count: "", image: null }, file: null, filepath: null })
         }
         else {
-            if ((type === "Delete") && (this.state.selecteddrink.id !== null)) {
-                //await DeleteDrink(this.state.selecteddrink.id);
-                //this.setState(prevState => {
-                //    const drinks = [...prevState.drinks];
-                //    drinks.splice(drinks.indexOf(this.state.selecteddrink), 1);
-                //    return { drinks: drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false };
-                //})
-                //alert("Напиток удален");
-            }
-            else if ((type === "Edit") && (this.state.selecteddrink.id !== null)) {
+            if ((type === "Edit") && (this.state.selecteddrink.id !== null)) {
                 this.setState({ type: "Edit", file: null, filepath: null })
 
             }
@@ -163,6 +157,7 @@ export class AdminView extends Component {
         }
         let id = await this.SendDrink(newdrink);
         await SaveImage(id, this.state.file);
+        this.setState({ message: { header: "Успешно", body: "Напиток добавлен", show: true } })
     }
 
     async PutDrink(drink) {
@@ -175,6 +170,7 @@ export class AdminView extends Component {
         await PutDrink(newdrink);
         if (this.state.filepath !== null)
             await PutImage(drink.id, this.state.file);
+        this.setState({ message: { header: "Успешно", body: "Напиток изменен", show: true } });
     }
 
     render() {
@@ -183,6 +179,7 @@ export class AdminView extends Component {
         }
         return (
             <div className="container">
+                {this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null}
                 <div class="row">
                     <div class="col-4 border-right border-dark">
                         <div className="row justify-content-md-center">
@@ -192,7 +189,7 @@ export class AdminView extends Component {
                             {this.state.coins.map((coin) => (
                                 <div key={coin.id} className="container border-top border-gray">
                                     <div className="row justify-content-md-center">
-                                        <h5>Номинал     {coin.name} {coin.isBlocked ? "(заблокирован)" : null}</h5>
+                                        <h5>Номинал {coin.name} {coin.isBlocked ? "(заблокирован)" : null}</h5>
                                     </div>
                                     <div className="row">
                                         <div class="input-group mb-3">
@@ -224,7 +221,7 @@ export class AdminView extends Component {
                             <div className="row mb-2 mt-2">
                                 <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Add")}>Добавить напиток</button></div>
                                 <div className="col-4"><DeleteButton handleToUpdate={this.handleToUpdate.bind(this)} drink={this.state.selecteddrink} /></div>
-                                {/*<div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Delete")}>Удалить напиток</button></div>*/}
+                                
                                 <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Edit")}>Изменить напиток</button></div>
                             </div>
                             {this.state.type !== false ?

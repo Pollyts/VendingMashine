@@ -1,51 +1,19 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 
-export default class Message extends Component {
-    constructor(props) {
-        super(props);
-        console.log(this.props);
-        this.state = { isdeleted: null }
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    handleSubmit = async e => {
+export function Message(props) {
+    const handleSubmit = async e => {
         e.preventDefault();
-        await DeleteElement(this.props.element.Id);
-        this.props.onClose();
-        this.setState({ isdeleted: true });
+        props.HideMessage();
     }
-
-    render() {
-        console.log("рендер удаления");
-        if (this.state.isdeleted) {
-            let bc = this.props.prevpages;
-            bc.length = bc.length - 1;
-            this.setState({ isdeleted: false });
-            console.log("Я в удалении");
-            return <Redirect to={{
-                pathname: bc[bc.length - 1].path, state: { body: bc[bc.length - 1].body, breadCrumbs: bc }
-            }} />
-        }
-        if (!this.props.show) {
-            return null
-        }
-
-        console.log(this.props);
-        return (
-            <div className="ModalPage" onClick={this.props.onClose}>
-                <div className="modal-content" onClick={e => e.stopPropagation()}>
-                    <div className="modal-header">
-                        <div className="modal-title">Удаление элемента {this.props.element.Name}</div>
-                    </div>
-                    <div className="modal-body">
-                        <label className="formlabel"> Вы действительно хотите удалить элемент {this.props.element.Name}?</label>
-                    </div>
-                    <div className="modal-footer">
-                        <button className="button SaveButton" onClick={this.handleSubmit}>Да</button>
-                        <button className="button CloseButton" onClick={this.props.onClose}>Отменить</button>
+    return (
+        <div className="ModalPage" onClick={handleSubmit}>
+                    <div className="modal-content p-3" onClick={e => e.stopPropagation()}>
+                        <div className="row justify-content-md-center"><h3>{props.header}</h3></div>
+                        <div className="row justify-content-md-center">{props.body}</div>
+                        <div className="row mt-3 justify-content-around">
+                            <div className="col d-flex justify-content-center "><button className="btn btn-dark instruments" onClick={handleSubmit}>OK</button></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )
-    }
+    );
 }

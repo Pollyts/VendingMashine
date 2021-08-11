@@ -79,6 +79,9 @@ export class AdminView extends Component {
         if (ex) {
             this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
         }
+        else {
+            this.setState({ message: { header: "Успешно", body: `Количество монет для номинала ${this.state.coins[id].name} изменено`, show: true } })
+        }
     }
 
     ChangeCoinCount = id => e => {

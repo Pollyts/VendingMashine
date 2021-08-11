@@ -22,7 +22,7 @@ namespace VendingMashine.Controllers
             _drinkService = drinkService;
         }
         [HttpGet]
-        public async Task<Drink[]> GetDrinks()
+        public async Task<ClientDrink[]> GetDrinks()
         {
             return await _drinkService.GetDrinks();
         }
@@ -37,7 +37,7 @@ namespace VendingMashine.Controllers
         }
 
         [HttpPost]
-        public async Task<int> PostDrink(Drink drink)
+        public async Task<int> PostDrink(ClientDrink drink)
         {
             return await _drinkService.PostDrink(drink);
         }
@@ -56,7 +56,7 @@ namespace VendingMashine.Controllers
         }
 
         [HttpPut]
-        public async Task ChangeDrink(Drink newdrink)
+        public async Task ChangeDrink(ClientDrink newdrink)
         {
             await _drinkService.ChangeDrink(newdrink);
         }        

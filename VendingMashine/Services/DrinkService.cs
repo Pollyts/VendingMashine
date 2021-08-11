@@ -17,7 +17,7 @@ namespace VendingMashine.Services
         {
             _repository = repository;
         }
-        public async Task ChangeDrink(Drink newdrink)
+        public async Task ChangeDrink(ClientDrink newdrink)
         {
             await _repository.ChangeDrink(newdrink);
         }
@@ -27,11 +27,11 @@ namespace VendingMashine.Services
             await _repository.DeleteDrink(id);
         }        
 
-        public async Task<Drink[]> GetDrinks()
+        public async Task<ClientDrink[]> GetDrinks()
         {
             return await _repository.GetDrinks();
         }
-        public async Task<int> PostDrink(Drink drink)
+        public async Task<int> PostDrink(ClientDrink drink)
         {
             return await _repository.PostDrink(drink);
         }

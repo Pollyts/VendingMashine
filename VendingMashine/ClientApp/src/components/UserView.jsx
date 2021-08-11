@@ -77,7 +77,7 @@ export class UserView extends Component {
     }
     async GetOddMoney() {
         let change = this.state.money - this.state.sum;
-        let oddmoney=0;
+        let oddmoney = {oddmoney:0};
         if (change > 0) {
             oddmoney = await GetOddMoney(change);      
         }

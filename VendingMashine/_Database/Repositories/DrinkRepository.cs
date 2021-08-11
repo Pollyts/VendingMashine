@@ -16,7 +16,7 @@ namespace VendingMashine._Database.Repositories
         {
         }
 
-        public async Task ChangeDrink(Drink newdrink)
+        public async Task ChangeDrink(ClientDrink newdrink)
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
             {
@@ -39,12 +39,18 @@ namespace VendingMashine._Database.Repositories
             }
         }
 
-        public async Task<Drink[]> GetDrinks()
+        public async Task<ClientDrink[]> GetDrinks()
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
             {
-                Drink[] drinks;
-                drinks = await db.Drinks.ToArrayAsync();
+                ClientDrink[] drinks;
+                drinks = await db.Drinks.Select(p => new ClientDrink
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Count=p.Count,
+                    Price=p.Price                    
+                }).ToArrayAsync();
                 return drinks;
             }
         }
@@ -61,10 +67,16 @@ namespace VendingMashine._Database.Repositories
 
 
 
-        public async Task<int> PostDrink(Drink drink)
+        public async Task<int> PostDrink(ClientDrink cdrink)
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
             {
+                Drink drink = new Drink()
+                {
+                    Name = cdrink.Name,
+                    Price = cdrink.Price,
+                    Count = cdrink.Count
+                };
                 db.Drinks.Add(drink);
                 await db.SaveChangesAsync();
                 return drink.Id;

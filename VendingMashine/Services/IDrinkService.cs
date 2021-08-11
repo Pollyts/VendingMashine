@@ -9,11 +9,11 @@ namespace VendingMashine.Services
 {
     public interface IDrinkService
     {
-        Task<Drink[]> GetDrinks();
-        Task<int> PostDrink(Drink drink);
+        Task<ClientDrink[]> GetDrinks();
+        Task<int> PostDrink(ClientDrink drink);
         Task PostDrinksWithImage(int id, [FromForm] DrinkWithImage el);
         Task PutDrinksWithImage(int id, [FromForm] DrinkWithImage el);
-        Task ChangeDrink(Drink newdrink);
+        Task ChangeDrink(ClientDrink newdrink);
         Task DeleteDrink(int id);
         Task<byte[]> GetImageForDrink(int id);
     }

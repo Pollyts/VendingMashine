@@ -14,4 +14,20 @@ namespace VendingMashine.Models
     {
         public IFormFile Image { get; set; }
     }
+
+    public class UserCoin
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool IsBlocked { get; set; }
+    }
+    public class UserDrink
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Price { get; set; }
+        public int Count { get; set; }
+    }
+
+
 }

@@ -32,12 +32,24 @@ export class AdminView extends Component {
         }
         let db_coins = await this.GetCoins();
         let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks, coins: db_coins });
+        if (db_coins.exception) {
+            this.setState({ message: { header: db_coins.exception, body: "Попробуйте обновить страницу", show: true } });
+        }
+        else
+            if (db_drinks.exception) {
+                this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+            }
+            else {
+                this.setState({ drinks: db_drinks.db_drinks, coins: db_coins.coins });
+            }
     }
 
     async handleToUpdate() {
         let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks});
+        if (db_drinks.exception) {
+            this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+        }
+        this.setState({ drinks: db_drinks.db_drinks });
     }
     async HideMessage() {        
         this.setState({ message: { header: null, body: null, show: false }});
@@ -61,11 +73,10 @@ export class AdminView extends Component {
     SaveCoinsCount = id => async e => {
         let coin = {
             Id: Number(this.state.coins[id].id),
-            Name: this.state.coins[id].name,
             Count: Number(this.state.coins[id].count)
         };
         let ex = await SaveCoinsCount(coin);
-        if (ex !== null) {
+        if (ex) {
             this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
         }
     }
@@ -92,8 +103,8 @@ export class AdminView extends Component {
     BlockCoin = id => async e => {
         let coins;
         let ex = await BlockToMashine(this.state.coins[id].name)
-        if (ex !== null) {
-
+        if (ex) {
+            this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
         }
         else {
             this.setState(prevState => {
@@ -147,10 +158,7 @@ export class AdminView extends Component {
         }
         else {
             await this.PutDrink(this.state.selecteddrink)
-        }
-        this.setState({ drinks: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false, file: null, filepath: null });
-        let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks });
+        }        
     }
 
     async SendDrink(newdrink) {
@@ -164,9 +172,24 @@ export class AdminView extends Component {
             Price: Number(drink.price),
             Count: Number(drink.count)
         }
-        let id = await this.SendDrink(newdrink);
-        await SaveImage(id, this.state.file);
-        this.setState({ message: { header: "Успешно", body: "Напиток добавлен", show: true } })
+        let data = await this.SendDrink(newdrink);
+        if (data.exception) {
+            this.setState({ message: { header: data.exception, body: "Попробуйте обновить страницу и ввести заново", show: true } })
+        }
+        else {
+            let ex = await SaveImage(data.id, this.state.file);
+            if (ex) {
+                this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
+            }
+            else {
+                this.setState({ message: { header: "Успешно", body: "Напиток добавлен", show: true } ,drinks: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false, file: null, filepath: null });
+                let db_drinks = await this.GetDrinks();
+                if (db_drinks.exception) {
+                    this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+                }
+                this.setState({ drinks: db_drinks.db_drinks });
+            }            
+        }        
     }
 
     async PutDrink(drink) {
@@ -176,14 +199,31 @@ export class AdminView extends Component {
             Price: Number(drink.price),
             Count: Number(drink.count)
         }
-        await PutDrink(newdrink);
-        if (this.state.filepath !== null)
-            await PutImage(drink.id, this.state.file);
-        this.setState({ message: { header: "Успешно", body: "Напиток изменен", show: true } });
+        let exception = await PutDrink(newdrink);
+        if (exception) {
+            this.setState({ message: { header: exception, body: "Попробуйте обновить страницу и ввести заново", show: true } })
+        }
+        else {
+            let ex;
+            if (this.state.filepath !== null) {
+                ex = await PutImage(drink.id, this.state.file);
+            }            
+            if (ex) {
+                this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
+            }
+            else {
+                this.setState({ message: { header: "Успешно", body: "Напиток изменен", show: true }, drinks: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false, file: null, filepath: null });
+                let db_drinks = await this.GetDrinks();
+                if (db_drinks.exception) {
+                    this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+                }
+                this.setState({ drinks: db_drinks.db_drinks });
+            }
+        }
     }
 
     render() {
-        if ((!this.state.drinks) && (!this.state.coins)) {
+        if ((!this.state.drinks) || (!this.state.coins)) {
             return (<div>
                 { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null})
             </div>)

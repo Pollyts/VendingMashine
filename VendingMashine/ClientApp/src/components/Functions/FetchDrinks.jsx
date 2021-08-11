@@ -24,7 +24,7 @@ export async function ReduceCountDrink(newdrink) {
             "Content-Type": "application/json",
         },
     }).then((response) => {
-        if (response.status < 200 && response.status >= 300)
+        if (response.status < 200 || response.status >= 300)
         throw "Ошибка при выдаче напитка"
     }).catch((error) => {
         ex = error;
@@ -42,7 +42,7 @@ export async function DeleteDrink(id) {
                 'Content-Type': 'application/json'
             }
         }).then((response) => {
-            if (response.status < 200 && response.status >= 300)
+            if (response.status < 200 || response.status >= 300)
                 throw "Ошибка при удалении напитка"
         }).catch((error) => {
             ex = error;
@@ -81,7 +81,7 @@ export async function SaveImage(id, elwithimg) {
             'Accept': 'application/json'
         }
     }).then((response) => {
-        if (response.status < 200 && response.status >= 300)
+        if (response.status < 200 || response.status >= 300)
             throw "Ошибка при сохранении изображения"
     }).catch((error) => {
         ex = error;
@@ -99,7 +99,7 @@ export async function PutImage(id, elwithimg) {
             'Accept': 'application/json'
         }
     }).then((response) => {
-        if (response.status < 200 && response.status >= 300)
+        if (response.status < 200 || response.status >= 300)
             throw "Ошибка при сохранении изображения"
     }).catch((error) => {
         ex = error;
@@ -117,7 +117,7 @@ export async function PutDrink(newdrink) {
             "Content-Type": "application/json",
         },
     }).then((response) => {
-        if (response.status < 200 && response.status >= 300)
+        if (response.status < 200 || response.status >= 300)
             throw "Ошибка при изменении данных о напитке"
     }).catch((error) => {
         ex = error;

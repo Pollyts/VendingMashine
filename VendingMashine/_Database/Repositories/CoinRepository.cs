@@ -38,7 +38,7 @@ namespace VendingMashine._Database.Repositories
             }
         }
 
-        public async Task ChangeCoinCount(Coin newcoin)
+        public async Task ChangeCoinCount(CoinForCount newcoin)
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
             {
@@ -76,12 +76,32 @@ namespace VendingMashine._Database.Repositories
             }
         }
 
-        public async Task<Coin[]> GetCoins()
+        public async Task<UserCoin[]> GetUserCoins()
         {
             using (var db = ContextFactory.CreateDbContext(ConnectionString))
             {
-                Coin[] coins;
-                coins = await db.Coins.ToArrayAsync();
+                UserCoin[] coins;
+                coins = await db.Coins.Select(p => new UserCoin
+                {
+                    Id = p.Id,
+                    Name=p.Name,
+                    IsBlocked=p.IsBlocked
+                }).ToArrayAsync();
+                return coins;
+            }
+        }
+        public async Task<AdminCoin[]> GetAdminCoins()
+        {
+            using (var db = ContextFactory.CreateDbContext(ConnectionString))
+            {
+                AdminCoin[] coins;
+                coins = await db.Coins.Select(p => new AdminCoin
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    IsBlocked = p.IsBlocked,
+                    Count=p.Count
+                }).ToArrayAsync();
                 return coins;
             }
         }

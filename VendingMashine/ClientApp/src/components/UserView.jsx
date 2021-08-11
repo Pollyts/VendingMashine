@@ -130,7 +130,7 @@ export class UserView extends Component {
         })
     };
     render() {
-        if ((!this.state.drinks) && (!this.state.coins)) {
+        if ((!this.state.drinks) || (!this.state.coins)) {
             return (<div>
                 { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null}
             </div>)
@@ -160,7 +160,7 @@ export class UserView extends Component {
                             Выбрано напитков на сумму: {this.state.sum}
                         </div>
                         <div className="row justify-content-md-center mt-3">
-                            {(this.state.sum > this.state.money) ? <div className="text-danger">Нехватает монет для покупки</div>:null}
+                            {(this.state.sum > this.state.money) ? <div className="text-danger">Недостаточно монет для покупки</div>:null}
                                 </div>
                         <div className="row justify-content-md-center mt-1">
                             {(this.state.sum > this.state.money || this.state.sum === 0) ?

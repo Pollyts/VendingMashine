@@ -26,7 +26,7 @@ namespace VendingMashine.Services
             await _repository.BlockCoin(name);
         }
 
-        public async Task ChangeCoinCount(Coin newcoin)
+        public async Task ChangeCoinCount(CoinForCount newcoin)
         {
             await _repository.ChangeCoinCount(newcoin);
         }
@@ -36,9 +36,14 @@ namespace VendingMashine.Services
             await _repository.GetCoinChange(coin,change);
         }
 
-        public async Task<Coin[]> GetCoins()
+        public async Task<AdminCoin[]> GetAdminCoins()
         {
-            return await _repository.GetCoins();
+            return  await _repository.GetAdminCoins();
+        }
+
+        public async Task<UserCoin[]> GetUserCoins()
+        {
+            return await _repository.GetUserCoins();
         }
 
         public async Task<int> GetOddMoney(int change)

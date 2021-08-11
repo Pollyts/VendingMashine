@@ -9,8 +9,9 @@ namespace VendingMashine.Services
     public interface ICoinService
     {
 		Task AddCoin(string name);
-		Task ChangeCoinCount(Coin newcoin);
-		Task<Coin[]> GetCoins();
+		Task ChangeCoinCount(CoinForCount newcoin);
+		Task<AdminCoin[]> GetAdminCoins();
+		Task<UserCoin[]> GetUserCoins();		
 		Task BlockCoin(string name);
 		Task<int> GetOddMoney(int change);
 	}

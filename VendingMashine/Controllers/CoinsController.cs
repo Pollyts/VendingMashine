@@ -26,15 +26,21 @@ namespace VendingMashine.Controllers
         }
 
         [HttpPut]
-        public async Task ChangeCoinCount(Coin newcoin)
+        public async Task ChangeCoinCount(CoinForCount newcoin)
         {
             await _coinService.ChangeCoinCount(newcoin);
         }
 
         [HttpGet]
-        public async Task<Coin[]> GetCoins()
+        [Route("/api/coins/user")]
+        public async Task<UserCoin[]> GetCoinsForUser()
         {
-            return await _coinService.GetCoins();
+            return await _coinService.GetUserCoins();
+        }
+        [HttpGet]
+        public async Task<AdminCoin[]> GetCoinsForAdmin()
+        {
+            return await _coinService.GetAdminCoins();
         }
 
         [Route("/api/coins/block/{name}")]

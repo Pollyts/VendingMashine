@@ -16,14 +16,17 @@ export class UserView extends Component {
     }
 
     async GetDrinks() {
-        let drinks = await GetDrinks();        
-        let db_drinks = drinks.map((d) => {
+        let drinks = await GetDrinks();
+        if (drinks.exception) {
+            return { db_drinks: null, exception: drinks.exception }
+        }
+        let db_drinks = drinks.db_drinks.map((d) => {
                     return {
                         ...d,
                         selected: 0
                     }
-                });
-        return db_drinks;
+        });
+        return { db_drinks: db_drinks, exception: undefined };
     }
     async GetCoins() {
         let db_coins = await GetCoins();
@@ -33,11 +36,16 @@ export class UserView extends Component {
 
     async componentDidMount() {
         let db_coins = await this.GetCoins();
-        if (db_coins.exception !== null)
-            this.setState({ message: { header: "Message", body: "Message", show: true } });
-        else {
-            let db_drinks = await this.GetDrinks();
-            this.setState({ drinks: db_drinks, coins: db_coins });
+        let db_drinks = await this.GetDrinks();
+        if (db_coins.exception) {
+            this.setState({ message: { header: db_coins.exception, body: "Попробуйте обновить страницу", show: true } });
+        }
+        else
+            if (db_drinks.exception) {
+                this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+            }                
+            else {
+                this.setState({ drinks: db_drinks.db_drinks, coins: db_coins.coins });
         }
     }
 
@@ -46,8 +54,13 @@ export class UserView extends Component {
     }
 
     AddCoin = coin => async e => {
-        await AddCoinToMashine(coin)
-        this.setState({ money: this.state.money + Number(coin) })        
+        let ex = await AddCoinToMashine(coin);
+        if (ex) {
+            this.setState({ message: { header: ex, body: "Обновите страницу и попробуйте еще раз", show: true } })
+        }
+        else {
+            this.setState({ money: this.state.money + Number(coin) })
+        }               
     };
 
     async ReduceCountDrink(drink) {
@@ -57,16 +70,35 @@ export class UserView extends Component {
             Price: drink.price,
             Count: drink.count - drink.selected
         }
-        await ReduceCountDrink(newdrink);
+        let ex = await ReduceCountDrink(newdrink);
+        if (ex) {
+            this.setState({ message: { header: ex, body: "Обновите страницу и попробуйте еще раз", show: true } })
+        }
     }
     async GetOddMoney() {
         let change = this.state.money - this.state.sum;
         let oddmoney=0;
         if (change > 0) {
-            await GetOddMoney(change);      
+            oddmoney = await GetOddMoney(change);      
         }
-        /*alert("Сдача " + oddmoney);*/
-        window.location.reload();
+        if (oddmoney.exception) {
+            this.setState({ message: { header: oddmoney.exception, body: "Попробуйте обновить страницу и повторить действия", show: true } })
+        }
+        else {
+            let db_coins = await this.GetCoins();
+            let db_drinks = await this.GetDrinks();
+            if (db_coins.exception) {
+                this.setState({ message: { header: db_coins.exception, body: "Попробуйте обновить страницу", show: true } });
+            }
+            else
+                if (db_drinks.exception) {
+                    this.setState({ message: { header: db_drinks.exception, body: "Попробуйте обновить страницу", show: true } });
+                }
+                else {
+                    this.setState({ money: 0, drinks: db_drinks.db_drinks, coins: db_coins.coins, message: { header: "Спасибо за покупку", body: `Сдача ${oddmoney.oddmoney} монет`, show: true }, sum: 0 });
+                }
+            
+        }
     }
 
     async Buy(e) {
@@ -100,11 +132,12 @@ export class UserView extends Component {
     render() {
         if ((!this.state.drinks) && (!this.state.coins)) {
             return (<div>
-                { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null})
+                { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null}
             </div>)
         }
         return (
             <div className="container-fluid">
+                {this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null}
                 <div className="row">
                     <div className="col-4 border-right border-dark">
                         <div className="row justify-content-md-center mb-2">

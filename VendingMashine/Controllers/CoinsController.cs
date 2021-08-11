@@ -34,7 +34,7 @@ namespace VendingMashine.Controllers
         [HttpGet]
         public async Task<Coin[]> GetCoins()
         {
-            await _coinService.GetCoins();
+            return await _coinService.GetCoins();
         }
 
         [Route("/api/coins/block/{name}")]

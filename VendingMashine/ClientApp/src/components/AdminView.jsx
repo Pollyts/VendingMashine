@@ -64,7 +64,10 @@ export class AdminView extends Component {
             Name: this.state.coins[id].name,
             Count: Number(this.state.coins[id].count)
         };
-        await SaveCoinsCount(coin);
+        let ex = await SaveCoinsCount(coin);
+        if (ex !== null) {
+            this.setState({ message: { header: ex, body: "Попробуйте обновить страницу и ввести заново", show: true } })
+        }
     }
 
     ChangeCoinCount = id => e => {
@@ -88,12 +91,18 @@ export class AdminView extends Component {
        
     BlockCoin = id => async e => {
         let coins;
-        this.setState(prevState => {
-            coins = [...prevState.coins];
-            coins[id].isBlocked = !coins[id].isBlocked;
-            return { coins: coins };
-        })
-        await BlockToMashine(this.state.coins[id].name)
+        let ex = await BlockToMashine(this.state.coins[id].name)
+        if (ex !== null) {
+
+        }
+        else {
+            this.setState(prevState => {
+                coins = [...prevState.coins];
+                coins[id].isBlocked = !coins[id].isBlocked;
+                return { coins: coins };
+            })
+        }        
+        
     };
 
     SelectDrink = id => e => {
@@ -174,8 +183,10 @@ export class AdminView extends Component {
     }
 
     render() {
-        if (!this.state.drinks) {
-            return null;
+        if ((!this.state.drinks) && (!this.state.coins)) {
+            return (<div>
+                { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null})
+            </div>)
         }
         return (
             <div className="container">

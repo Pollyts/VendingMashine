@@ -1,4 +1,6 @@
 ﻿import React, { Component } from 'react';
+import { GetCoins, AddCoinToMashine, GetOddMoney } from './/Functions/FetchCoin';
+import { GetDrinks, ReduceCountDrink } from './/Functions/FetchDrinks';
 
 
 export class UserView extends Component {   
@@ -12,29 +14,17 @@ export class UserView extends Component {
     }
 
     async GetDrinks() {
-        let db_drinks;
-        await fetch('https://localhost:44347/api/drinks')
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                db_drinks = data.map((d) => {
+        let drinks = await GetDrinks();        
+        let db_drinks = drinks.map((d) => {
                     return {
                         ...d,
                         selected: 0
                     }
                 });
-            })
         return db_drinks;
     }
     async GetCoins() {
-        let db_coins;
-        await fetch('https://localhost:44347/api/coins')
-            .then((response) => {
-                return response.json();
-            }).then(data => {
-                db_coins = data;
-            });
+        let db_coins = await GetCoins();
         return db_coins;
     }
 
@@ -46,14 +36,9 @@ export class UserView extends Component {
     }
 
     AddCoin = coin => async e => {
-        await this.AddCoinToMashine(coin)
+        await AddCoinToMashine(coin)
         this.setState({ money: this.state.money + Number(coin) })        
     };
-
-    async AddCoinToMashine(name) {
-        await fetch('https://localhost:44347/api/coins/' + name
-        );
-    }
 
     async ReduceCountDrink(drink) {
         let newdrink = {
@@ -62,25 +47,15 @@ export class UserView extends Component {
             Price: drink.price,
             Count: drink.count - drink.selected
         }
-        await fetch('https://localhost:44347/api/drinks', {
-            method: "PUT",
-            body: JSON.stringify(newdrink),
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
+        await ReduceCountDrink(newdrink);
     }
     async GetOddMoney() {
         let change = this.state.money - this.state.sum;
         let oddmoney=0;
         if (change > 0) {
-            await fetch('https://localhost:44347/api/coins/oddmoney/' + change).then(response => { return response.json() })
-                .then(data => {
-                    oddmoney = data
-                });       
+            await GetOddMoney(change);      
         }
-        alert("Сдача " + oddmoney);
+        /*alert("Сдача " + oddmoney);*/
         window.location.reload();
     }
 
@@ -152,7 +127,7 @@ export class UserView extends Component {
 
                         <div className="row">
                             {this.state.drinks.map((drink) => (
-                                <div key={drink.id} className="col-3">
+                                <div key={drink.id} className="col-3 m-2 border border border-light">
                                     <div className="row no-overfolw justify-content-center">{drink.name}</div>
                                     <div className="row no-overfolw justify-content-center">
                                     <img
@@ -162,16 +137,17 @@ export class UserView extends Component {
                                         />
                                     </div>
                                     <div className="row no-overfolw justify-content-center">Цена: {drink.price}</div>
-                                    <div className="row justify-content-center">
-                                        {drink.selected ===0 ?
+                                    {drink.count === 0 ? <div className="row justify-content-center">Нет в наличии</div>: <div className="row justify-content-center">
+                                        {drink.selected === 0 ?
                                             <button type="button" className="btn btn-dark disabled mr-1">-</button>
                                             : <button type="button" className="btn btn-dark mr-1" onClick={this.RemoveDrink(this.state.drinks.indexOf(drink))}>-</button>}
                                         <div>{drink.selected}</div>
 
-                                            {drink.selected === drink.count ?
+                                        {drink.selected === drink.count ?
                                             <button type="button" className="btn btn-dark disabled ml-1">+</button>
                                             : <button type="button" className="btn btn-dark ml-1" onClick={this.AddDrink(this.state.drinks.indexOf(drink))}>+</button>}
-                                </div>
+                                    </div>}
+                                    
                             </div>                            
                             
                         ))}

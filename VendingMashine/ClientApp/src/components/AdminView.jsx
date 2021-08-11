@@ -1,5 +1,6 @@
-﻿import { get } from 'jquery';
-import React, { Component } from 'react';
+﻿import React, { Component } from 'react';
+import { SaveCoinsCount, GetCoins, BlockToMashine } from './/Functions/FetchCoin';
+import { GetDrinks, DeleteDrink, SendDrink, SaveImage, PutImage, PutDrink } from './/Functions/FetchDrinks';
 
 const key = "admin123";
 
@@ -7,9 +8,9 @@ export class AdminView extends Component {
     constructor(props) {
         super(props);
         this.BlockCoin = this.BlockCoin.bind(this);
-        this.AddDrink = this.AddDrink.bind(this); 
+        this.AddDrink = this.AddDrink.bind(this);
         this.SelectDrink = this.SelectDrink.bind(this);
-        this.ChangeType = this.ChangeType.bind(this); 
+        this.ChangeType = this.ChangeType.bind(this);
         this.ChangeName = this.ChangeName.bind(this);
         this.ChangePrice = this.ChangePrice.bind(this);
         this.ChangeCount = this.ChangeCount.bind(this);
@@ -17,7 +18,17 @@ export class AdminView extends Component {
         this.handleImageChange = this.handleImageChange.bind(this);
         this.Ok = this.Ok.bind(this);
         this.state = {
-            coins: null, drinks: null, file: null, filepath: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type:false};
+            coins: null, drinks: null, file: null, filepath: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false
+        };
+    }
+    async componentDidMount() {
+        if (this.props.match.params.key !== key) {
+            alert("Неверный код");
+            this.props.history.push("/");
+        }
+        let db_coins = await this.GetCoins();
+        let db_drinks = await this.GetDrinks();
+        this.setState({ drinks: db_drinks, coins: db_coins });
     }
 
     handleImageChange(e) {
@@ -35,25 +46,16 @@ export class AdminView extends Component {
         }
     };
 
-    
-
     SaveCoinsCount = id => async e => {
         let coin = {
             Id: Number(this.state.coins[id].id),
             Name: this.state.coins[id].name,
             Count: Number(this.state.coins[id].count)
         };
-            await fetch('https://localhost:44347/api/coins', {
-                method: "PUT",
-                body: JSON.stringify(coin),
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
+        await SaveCoinsCount(coin);
     }
-          
-    ChangeCoinCount = id => e => {        
+
+    ChangeCoinCount = id => e => {
         var val = e.target.value;
         this.setState(prevState => {
             const coins = [...prevState.coins];
@@ -63,95 +65,67 @@ export class AdminView extends Component {
     }
 
     async GetDrinks() {
-        let db_drinks;
-        await fetch('https://localhost:44347/api/drinks')
-            .then((response) => {
-                return response.json();
-            })
-            .then(data => {
-                db_drinks = data
-            });
+        let db_drinks = await GetDrinks();
         return db_drinks;
     }
+
     async GetCoins() {
-        let db_coins;
-        await fetch('https://localhost:44347/api/coins')
-            .then((response) => {
-                return response.json();
-            }).then(data => {
-                db_coins = data;
-            });
+        let db_coins = await GetCoins();
         return db_coins;
     }
 
-    async componentDidMount() {
-        if (this.props.match.params.key !== key) {
-            alert("Неверный код");
-            this.props.history.push("/");
-        }
-        let db_coins = await this.GetCoins();
-        let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks, coins: db_coins });
-    }
+    
 
     BlockCoin = id => async e => {
-        let coins;        
+        let coins;
         this.setState(prevState => {
             coins = [...prevState.coins];
             coins[id].isBlocked = !coins[id].isBlocked;
-            return { coins: coins};
+            return { coins: coins };
         })
-        await this.BlockToMashine(this.state.coins[id].name)
+        await BlockToMashine(this.state.coins[id].name)
     };
-
-    async BlockToMashine(name) {
-        await fetch('https://localhost:44347/api/coins/block/' + name
-        );
-    }   
 
     SelectDrink = id => e => {
         this.setState({ selecteddrink: this.state.drinks[id], type: false }
         )
-    };    
+    };
 
     ChangeType = type => async e => {
-        if ((type === "Delete") && (this.state.selecteddrink.id!==null)) {
-            await this.DeleteDrink(this.state.selecteddrink.id);
-            this.setState(prevState => {
-                const drinks = [...prevState.drinks];
-                drinks.splice(drinks.indexOf(this.state.selecteddrink), 1);
-                return { drinks: drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false };
-            })
-            alert("Напиток удален");
+        if (this.state.type !== false) {
+            this.setState({ type: false, selecteddrink: { id: null, name: "", price: "", count: "", image: null }, file: null, filepath: null })
         }
-        else if ((type === "Edit") && (this.state.selecteddrink.id !== null)) {
-            this.setState({ type: "Edit", file: null, filepath: null })
-            
-        }
-        else if (type === "Add") {
-            this.setState({ type: "Add", selecteddrink: { id: null, name: "", price: "", count: "", image: null }, file: null, filepath: null })
+        else {
+            if ((type === "Delete") && (this.state.selecteddrink.id !== null)) {
+                await DeleteDrink(this.state.selecteddrink.id);
+                this.setState(prevState => {
+                    const drinks = [...prevState.drinks];
+                    drinks.splice(drinks.indexOf(this.state.selecteddrink), 1);
+                    return { drinks: drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false };
+                })
+                alert("Напиток удален");
+            }
+            else if ((type === "Edit") && (this.state.selecteddrink.id !== null)) {
+                this.setState({ type: "Edit", file: null, filepath: null })
+
+            }
+            else if (type === "Add") {
+                this.setState({ type: "Add", selecteddrink: { id: null, name: "", price: "", count: "", image: null }, file: null, filepath: null })
+            }
         }
     };
-    async DeleteDrink(id) {
-        await fetch('https://localhost:44347/api/drinks/' + id,
-            {
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-    }
 
     ChangeName(e) {
         var val = e.target.value;
-        this.setState(prevState => ({ selecteddrink: { id: prevState.selecteddrink.id, name: val, price: prevState.selecteddrink.price, count: prevState.selecteddrink.count, image: prevState.selecteddrink.image} }))
-        }
-    ChangePrice(e){
+        this.setState(prevState => ({ selecteddrink: { id: prevState.selecteddrink.id, name: val, price: prevState.selecteddrink.price, count: prevState.selecteddrink.count, image: prevState.selecteddrink.image } }))
+    }
+
+    ChangePrice(e) {
         var val = e.target.value;
         this.setState(prevState => ({ selecteddrink: { id: prevState.selecteddrink.id, name: prevState.selecteddrink.name, price: val, count: prevState.selecteddrink.count, image: prevState.selecteddrink.image } }))
     }
-    ChangeCount(e){
+
+    ChangeCount(e) {
         var val = e.target.value;
         this.setState(prevState => ({ selecteddrink: { id: prevState.selecteddrink.id, name: prevState.selecteddrink.name, price: prevState.selecteddrink.price, count: val, image: prevState.selecteddrink.image } }))
     }
@@ -160,30 +134,17 @@ export class AdminView extends Component {
         e.preventDefault();
         if (this.state.type === "Add") {
             await this.AddDrink(this.state.selecteddrink)
-            alert("Напиток добавлен");
         }
         else {
             await this.PutDrink(this.state.selecteddrink)
-            alert("Напиток изменен");
         }
+        this.setState({ drinks: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false, file: null, filepath: null });
         let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false, file: null, filepath: null });
+        this.setState({ drinks: db_drinks });
     }
 
-
     async SendDrink(newdrink) {
-        let id;
-        await fetch('https://localhost:44347/api/drinks', {
-            method: "POST",
-            body: JSON.stringify(newdrink),
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        }).then(response => { return response.json() })
-            .then(data => {
-                id = data
-            });
+        let id = await SendDrink(newdrink);
         return id;
     }
 
@@ -193,20 +154,9 @@ export class AdminView extends Component {
             Price: Number(drink.price),
             Count: Number(drink.count)
         }
-        let id = await this.SendDrink(newdrink); 
-        await this.SaveImage(id, this.state.file);
+        let id = await this.SendDrink(newdrink);
+        await SaveImage(id, this.state.file);
     }
-    async SaveImage(id, elwithimg) {
-        await fetch('https://localhost:44347/api/drinks' + `/image/${id}`, {
-        method: 'POST', // или 'PUT'
-        body: elwithimg, // данные могут быть 'строкой' или {объектом}!
-        headers: {
-            'Accept': 'application/json'
-        }
-    }).then(function (response) {
-        console.log(response.status)
-    });
-}
 
     async PutDrink(drink) {
         let newdrink = {
@@ -215,18 +165,10 @@ export class AdminView extends Component {
             Price: Number(drink.price),
             Count: Number(drink.count)
         }
-        await fetch('https://localhost:44347/api/drinks', {
-            method: "PUT",
-            body: JSON.stringify(newdrink),
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
-        if (this.state.filepath!==null)
-        await this.SaveImage(drink.id, this.state.file);
+        await PutDrink(newdrink);
+        if (this.state.filepath !== null)
+            await PutImage(drink.id, this.state.file);
     }
-
 
     render() {
         if (!this.state.drinks) {
@@ -240,29 +182,29 @@ export class AdminView extends Component {
                             <h2> Редактор монет</h2>
                         </div>
                         <div className="container">
-                            {this.state.coins.map((coin) => (                                
+                            {this.state.coins.map((coin) => (
                                 <div key={coin.id} className="container border-top border-gray">
                                     <div className="row justify-content-md-center">
-                                        <h4>Номинал     {coin.name}</h4>
-                                        </div>
-                                            <div className="row">
-                                                <div class="input-group mb-3">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text">Количество</span>
-                                                    </div>
-                                                    <input type="number" min="0" value={coin.count} onChange={this.ChangeCoinCount(this.state.coins.indexOf(coin))}  class="form-control" placeholder="Количество"/>
-                                                        <div class="input-group-append">
-                                                            <button type="button" onClick={this.SaveCoinsCount(this.state.coins.indexOf(coin))} disabled={coin.count < 0} className={coin.count >= 0 ? "btn btn-dark" : "btn btn-dark disabled"}>OK</button>
-                                                        </div>
-                                                        </div>
-                                        </div>
-                                    <div className="row mb-2 justify-content-md-center">
-                                            {coin.isBlocked ?
-                                                <button type="button" className="btn btn-dark" onClick={this.BlockCoin(this.state.coins.indexOf(coin))}>Разблокировать</button>
-                                                : <button type="button" className="btn btn-dark" onClick={this.BlockCoin(this.state.coins.indexOf(coin))}>Заблокировать</button>}
-
+                                        <h5>Номинал     {coin.name} {coin.isBlocked ? "(заблокирован)" : null}</h5>
+                                    </div>
+                                    <div className="row">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Количество</span>
+                                            </div>
+                                            <input type="number" min="0" value={coin.count} onChange={this.ChangeCoinCount(this.state.coins.indexOf(coin))} class="form-control" placeholder="Количество" />
+                                            <div class="input-group-append">
+                                                <button type="button" onClick={this.SaveCoinsCount(this.state.coins.indexOf(coin))} disabled={coin.count < 0} className={coin.count >= 0 ? "btn btn-dark" : "btn btn-dark disabled"}>OK</button>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="row mb-2 justify-content-md-center">
+                                        {coin.isBlocked ?
+                                            <button type="button" className="btn btn-dark" onClick={this.BlockCoin(this.state.coins.indexOf(coin))}>Разблокировать</button>
+                                            : <button type="button" className="btn btn-dark" onClick={this.BlockCoin(this.state.coins.indexOf(coin))}>Заблокировать</button>}
+
+                                    </div>
+                                </div>
 
                             ))}
                         </div>
@@ -270,68 +212,79 @@ export class AdminView extends Component {
                     <div className="col-8">
                         <div className="row justify-content-md-center">
                             <h2> Редактор напитков</h2>
+                        </div>
+                        <div className="container sticky-top bg-white border-bottom border-dark">
+                            <div className="row mb-2 mt-2">
+                                <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Add")}>Добавить напиток</button></div>
+                                <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Delete")}>Удалить напиток</button></div>
+                                <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Edit")}>Изменить напиток</button></div>
                             </div>
-                        <div className="flex-row">
-                        <div className="container x-scroll">                        
+                            {this.state.type !== false ?
+                                <div className="container-fluid">
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <div className="row justify-content-between mb-1">
+                                                <div className="col">Название:</div>
+                                                <div className="col"><input type="text" value={this.state.selecteddrink.name} onChange={this.ChangeName} /></div>
+                                            </div>
+                                            <div className="row justify-content-between mb-1">
+                                                <div className="col">Стоимость:</div>
+                                                <div className="col"><input type="number" min="0" value={this.state.selecteddrink.price} onChange={this.ChangePrice} /></div>
+                                            </div>
+                                            <div className="row justify-content-between mb-1">
+                                                <div className="col">Количество:</div>
+                                                <div className="col"><input type="number" min="0" value={this.state.selecteddrink.count} onChange={this.ChangeCount} /></div>
+                                            </div>
+                                        </div>
+                                        <div className="col-3">
+                                            <div className="row justify-content-between mb-1">
+                                                <div className="col">Изображение:</div>
+                                                <div className="col"><label className="custom-file-upload">Загрузить изображение
+                <input type="file" onChange={(e) => this.handleImageChange(e)} />
+                                                </label>
+                                                </div>
+
+                                            </div>
+
+
+                                        </div>
+                                        <div className="col-3">
+                                            {this.state.filepath === null ? (
+                                                <img className="downloadimage" src={`https://localhost:44347/api/drinks/images/${this.state.selecteddrink.id}`} />
+                                            ) : (
+                                                <img className="downloadimage" src={this.state.filepath} />
+                                            )}
+                                        </div>
+
+                                    </div>
+                                    <div className="row justify-content-md-center">
+                                        <button type="button" disabled={(this.state.selecteddrink.name === "") || (Number(this.state.selecteddrink.price < 0)) || (Number(this.state.selecteddrink.count) < 0) || (this.state.type === "Add" ? this.state.filepath === null : false)} onClick={this.Ok} className={((this.state.selecteddrink.name != "") && (Number(this.state.selecteddrink.price) > 0) && (Number(this.state.selecteddrink.count) > 0) && (this.state.type === "Add" ? this.state.filepath !== null : true)) ? "btn btn-dark mb-3 instruments" : "btn btn-dark disabled mb-3 instruments"}>OK</button>
+                                    </div>
+                                </div>
+
+                                : null
+
+                            }
+                        </div>
+                        <div className="row">
                             {this.state.drinks.map((drink) => (
-                                <div key={drink.id} className={this.state.selecteddrink.id === drink.id ? "col-3 m-2 active no-overfolw drinkcursor" : "col-3 m-2 no-overfolw drinkcursor"} onClick={this.SelectDrink(this.state.drinks.indexOf(drink))} >
+                                <div key={drink.id} className={this.state.selecteddrink.id === drink.id ? "col-3 m-2 active no-overfolw drinkcursor border border-light" : "col-3 m-2 no-overfolw border border-light drinkcursor"} onClick={this.SelectDrink(this.state.drinks.indexOf(drink))} >
                                     <div>{drink.name}</div>
                                     <div>Цена: {drink.price}</div>
-                                    <div>Кол-во: {drink.count}</div>
+                                    <div className={drink.count === 0 ? "text-danger font-weight-bold" : null}>Кол-во: {drink.count}</div>
                                     <img
                                         className="drinkimage"
-                                        src={`data:image/jpeg;base64,${drink.image}`}
+                                        src={`https://localhost:44347/api/drinks/images/${drink.id}`}
                                         alt="No Image"
                                     />
 
                                 </div>
 
                             ))}
-                            </div>
                         </div>
-                        <div className="row mb-2 mt-2">
-                            <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Add")}>Добавить напиток</button></div>
-                            <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Delete")}>Удалить напиток</button></div>
-                            <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Edit")}>Изменить напиток</button></div>
-                        </div>
-                        {this.state.type!==false ?
-                            <div className="container">
-                                <div className="row justify-content-between mb-1">
-                                <div className="col">Название:</div>
-                                    <div className="col"><input type="text" value={this.state.selecteddrink.name} onChange={this.ChangeName}/></div>
-                            </div>
-                                <div className="row justify-content-between mb-1">
-                                    <div className="col">Стоимость:</div>
-                                    <div className="col"><input type="number" min="0" value={this.state.selecteddrink.price} onChange={this.ChangePrice} /></div>
-                            </div>
-                                <div className="row justify-content-between mb-1">
-                                <div className="col">Количество:</div>
-                                    <div className="col"><input type="number" min="0" value={this.state.selecteddrink.count} onChange={this.ChangeCount}/></div>
-                                </div>
-                                <div className="row justify-content-between mb-1">
-                                    <div className="col">Изображение:</div>
-                                    <div className="col"><label className="custom-file-upload">Загрузить изображение
-                <input type="file" onChange={(e) => this.handleImageChange(e)} />
-                                    </label>
-                                        {this.state.filepath === null ? (
-                                            <div>
-                                                <img className="downloadimage" src={`data:image/jpeg;base64,${this.state.selecteddrink.image}`} /></div>
-                                        ) : (
-                                            <img className="downloadimage" src={this.state.filepath} />
-                                        )}
-                                </div>                                    
-                                </div>
-                                <div className="row justify-content-md-center">
-                                    <button type="button" disabled={(this.state.selecteddrink.name === "") || (Number(this.state.selecteddrink.price < 0)) || (Number(this.state.selecteddrink.count) < 0) || (this.state.type === "Add" ? this.state.filepath === null : (this.state.selecteddrink.image === null) && (this.state.filepath === null))} onClick={this.Ok} className={((this.state.selecteddrink.name != "") && (Number(this.state.selecteddrink.price) > 0) && (Number(this.state.selecteddrink.count) > 0) && (this.state.type === "Add" ? this.state.filepath !== null : true)) ? "btn btn-dark instruments" : "btn btn-dark disabled instruments"}>OK</button>
-                                </div>
-                            </div>
-                            : null
-                                
-                        }      
+
                     </div>
                 </div>
-
-
             </div>
         );
     }

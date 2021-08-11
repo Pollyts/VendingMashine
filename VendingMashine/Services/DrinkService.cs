@@ -40,6 +40,10 @@ namespace VendingMashine.Services
         {
             await _repository.PostDrinksWithImage(id, el);
         }
+        public async Task PutDrinksWithImage(int id, [FromForm] DrinkWithImage el)
+        {
+            await _repository.PutDrinksWithImage(id, el);
+        }
         public async Task<byte[]> GetImageForDrink(int id)
         {
             var b_image = await _repository.GetImage(id);

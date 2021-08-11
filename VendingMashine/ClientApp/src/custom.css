@@ -27,11 +27,6 @@ code {
     width: 170px !important;
     height: 40px !important;
 }
-.x-scroll {
-    overflow-x: auto;
-    white-space: nowrap;
-    display: flex;
-}
 
 .no-overfolw {
     overflow: hidden;

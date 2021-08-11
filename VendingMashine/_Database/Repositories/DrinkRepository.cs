@@ -85,5 +85,20 @@ namespace VendingMashine._Database.Repositories
                 await db.SaveChangesAsync();
             }
         }
+        public async Task PutDrinksWithImage(int id, [FromForm] DrinkWithImage el)
+        {
+            using (var db = ContextFactory.CreateDbContext(ConnectionString))
+            {
+                byte[] imageData = null;
+                using (var binaryReader = new BinaryReader(el.Image.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)el.Image.Length);
+                }
+                DrinkImage image = await db.DrinkImages.Where(x => x.DrinkId == id).FirstOrDefaultAsync();
+                image.Image = imageData;
+                db.Entry(image).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+            }
+        }
     }
 }

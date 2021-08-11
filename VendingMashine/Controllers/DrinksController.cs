@@ -48,6 +48,12 @@ namespace VendingMashine.Controllers
         {
             await _drinkService.PostDrinksWithImage(id, el);
         }
+        [HttpPut]
+        [Route("/api/drinks/image/{id}")]
+        public async Task PutDrinksWithImage(int id, [FromForm] DrinkWithImage el)
+        {
+            await _drinkService.PutDrinksWithImage(id, el);
+        }
 
         [HttpPut]
         public async Task ChangeDrink(Drink newdrink)

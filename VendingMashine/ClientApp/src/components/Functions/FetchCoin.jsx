@@ -1,12 +1,17 @@
 ﻿export async function GetCoins() {
     let db_coins;
+    let ex;
     await fetch('https://localhost:44347/api/coins')
         .then((response) => {
-            return response.json();
+            if (response.status >= 200 && response.status<300)
+                return response.json();
+            throw "Ошибка при загрузке данных о монетах"
         }).then(data => {
             db_coins = data;
+        }).catch((error) => {
+            ex = error;
         });
-    return db_coins;
+    return { coins: db_coins, exception: ex };
 }
 
 

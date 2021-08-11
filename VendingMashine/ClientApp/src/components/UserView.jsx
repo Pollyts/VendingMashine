@@ -1,6 +1,7 @@
 ﻿import React, { Component } from 'react';
 import { GetCoins, AddCoinToMashine, GetOddMoney } from './/Functions/FetchCoin';
 import { GetDrinks, ReduceCountDrink } from './/Functions/FetchDrinks';
+import { Message } from './/ModalWindows/Message';
 
 
 export class UserView extends Component {   
@@ -9,8 +10,9 @@ export class UserView extends Component {
         this.AddCoin = this.AddCoin.bind(this);
         this.RemoveDrink = this.RemoveDrink.bind(this);
         this.AddDrink = this.AddDrink.bind(this);
+        this.HideMessage = this.HideMessage.bind(this)
         this.Buy = this.Buy.bind(this);
-        this.state = { money:0, coins:null, drinks:null, sum:0};
+        this.state = { money: 0, message: { header: null, body: null, show: false }, coins:null, drinks:null, sum:0};
     }
 
     async GetDrinks() {
@@ -31,8 +33,16 @@ export class UserView extends Component {
 
     async componentDidMount() {
         let db_coins = await this.GetCoins();
-        let db_drinks = await this.GetDrinks();
-        this.setState({ drinks: db_drinks, coins: db_coins });
+        if (db_coins.exception !== null)
+            this.setState({ message: { header: "Message", body: "Message", show: true } });
+        else {
+            let db_drinks = await this.GetDrinks();
+            this.setState({ drinks: db_drinks, coins: db_coins });
+        }
+    }
+
+    async HideMessage() {
+        this.setState({ message: { header: null, body: null, show: false } });
     }
 
     AddCoin = coin => async e => {
@@ -88,8 +98,10 @@ export class UserView extends Component {
         })
     };
     render() {
-        if (!this.state.drinks) {
-            return null;
+        if ((!this.state.drinks) && (!this.state.coins)) {
+            return (<div>
+                { this.state.message.show ? <Message HideMessage={this.HideMessage.bind(this)} body={this.state.message.body} header={this.state.message.header} /> : null})
+            </div>)
         }
         return (
             <div className="container-fluid">

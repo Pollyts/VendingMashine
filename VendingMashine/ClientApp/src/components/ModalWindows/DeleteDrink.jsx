@@ -1,65 +1,42 @@
-﻿import React, { Component } from "react";
+﻿import React, { useState } from 'react';
+import { DeleteDrink } from '../Functions/FetchDrinks';
 
-export default class DeleteComponent extends Component {
-    constructor(props) {
-        super(props);
-        console.log(this.props);
-        this.state = { isdeleted: null };
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
+export function DeleteButton(props) {
+    const [show, setShow] = useState(false);
 
-    handleSubmit = async (e) => {
+    const handleClose = () => setShow(false);
+    const handleShow = () => ( props.drink.id!==null? setShow(true):null );
+
+    const handleSubmit = async e => {
         e.preventDefault();
-        await DeleteFolder(this.props.component.Id);
-        this.props.onClose();
-        this.setState({ isdeleted: true });
-    };
-
-    render() {
-        console.log("рендер удаления");
-        if (this.state.isdeleted) {
-            let bc = this.props.prevpages;
-            bc.length = bc.length - 1;
-            this.setState({ isdeleted: false });
-            console.log("Я в удалении");
-            return (
-                <Redirect
-                    to={{
-                        pathname: bc[bc.length - 1].path,
-                        state: { body: bc[bc.length - 1].body, breadCrumbs: bc },
-                    }}
-                />
-            );
-        }
-        if (!this.props.show) {
-            return null;
-        }
-
-        console.log(this.props);
-        return (
-            <div className="ModalPage" onClick={this.props.onClose}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                    <div className="modal-header">
-                        <div className="modal-title">
-                            Удаление папки {this.props.component.Name}
-                        </div>
-                    </div>
-                    <div className="modal-body">
-                        <label className="formlabel">
-                            {" "}
-              Вы действительно хотите удалить папку {this.props.component.Name}?
-            </label>
-                    </div>
-                    <div className="modal-footer">
-                        <button className="button SaveButton" onClick={this.handleSubmit}>
-                            Да
-            </button>
-                        <button className="button CloseButton" onClick={this.props.onClose}>
-                            Отменить
-            </button>
-                    </div>
-                </div>
-            </div>
-        );
+        await DeleteDrink(props.drink.id);
+        props.handleToUpdate();
+        handleClose();
     }
+
+    return (
+        <>
+            <button className="btn btn-dark instruments" onClick={handleShow}>
+                Удалить напиток
+            </button>
+
+            {show?
+            <div className="ModalPage" onClick={handleClose}>
+                    <div className="modal-content p-3" onClick={e => e.stopPropagation()}>
+                        <div className="row justify-content-md-center"><h3>Удаление напитка {props.drink.name}</h3></div>
+                        <div className="row justify-content-md-center">Вы действительно хотите удалить напиток  {props.drink.name}?</div>
+                        <div className="row mt-3 justify-content-around">
+                            <div className="col-6 d-flex justify-content-center "><button className="btn btn-dark instruments" onClick={handleSubmit}>Да</button></div>
+                            <div className="col-6 d-flex justify-content-center "><button className="btn btn-dark instruments" onClick={handleClose}>Отменить</button></div>
+
+                        </div>
+                     
+                        
+                    
+                   
+            </div>
+                </div>
+                :null}
+        </>
+    );
 }

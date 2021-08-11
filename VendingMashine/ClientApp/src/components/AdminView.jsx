@@ -1,6 +1,7 @@
 ﻿import React, { Component } from 'react';
+import { DeleteButton } from './/ModalWindows/DeleteDrink';
 import { SaveCoinsCount, GetCoins, BlockToMashine } from './/Functions/FetchCoin';
-import { GetDrinks, DeleteDrink, SendDrink, SaveImage, PutImage, PutDrink } from './/Functions/FetchDrinks';
+import { GetDrinks, SendDrink, SaveImage, PutImage, PutDrink } from './/Functions/FetchDrinks';
 
 const key = "admin123";
 
@@ -16,6 +17,7 @@ export class AdminView extends Component {
         this.ChangeCount = this.ChangeCount.bind(this);
         this.SaveCoinsCount = this.SaveCoinsCount.bind(this);
         this.handleImageChange = this.handleImageChange.bind(this);
+        this.handleToUpdate = this.handleToUpdate.bind(this)
         this.Ok = this.Ok.bind(this);
         this.state = {
             coins: null, drinks: null, file: null, filepath: null, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false
@@ -29,6 +31,11 @@ export class AdminView extends Component {
         let db_coins = await this.GetCoins();
         let db_drinks = await this.GetDrinks();
         this.setState({ drinks: db_drinks, coins: db_coins });
+    }
+
+    async handleToUpdate() {
+        let db_drinks = await this.GetDrinks();
+        this.setState({ drinks: db_drinks});
     }
 
     handleImageChange(e) {
@@ -97,13 +104,13 @@ export class AdminView extends Component {
         }
         else {
             if ((type === "Delete") && (this.state.selecteddrink.id !== null)) {
-                await DeleteDrink(this.state.selecteddrink.id);
-                this.setState(prevState => {
-                    const drinks = [...prevState.drinks];
-                    drinks.splice(drinks.indexOf(this.state.selecteddrink), 1);
-                    return { drinks: drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false };
-                })
-                alert("Напиток удален");
+                //await DeleteDrink(this.state.selecteddrink.id);
+                //this.setState(prevState => {
+                //    const drinks = [...prevState.drinks];
+                //    drinks.splice(drinks.indexOf(this.state.selecteddrink), 1);
+                //    return { drinks: drinks, selecteddrink: { id: null, name: "", price: "", count: "" }, type: false };
+                //})
+                //alert("Напиток удален");
             }
             else if ((type === "Edit") && (this.state.selecteddrink.id !== null)) {
                 this.setState({ type: "Edit", file: null, filepath: null })
@@ -216,7 +223,8 @@ export class AdminView extends Component {
                         <div className="container sticky-top bg-white border-bottom border-dark">
                             <div className="row mb-2 mt-2">
                                 <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Add")}>Добавить напиток</button></div>
-                                <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Delete")}>Удалить напиток</button></div>
+                                <div className="col-4"><DeleteButton handleToUpdate={this.handleToUpdate.bind(this)} drink={this.state.selecteddrink} /></div>
+                                {/*<div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Delete")}>Удалить напиток</button></div>*/}
                                 <div className="col-4"><button type="button" className="btn btn-dark instruments" onClick={this.ChangeType("Edit")}>Изменить напиток</button></div>
                             </div>
                             {this.state.type !== false ?
